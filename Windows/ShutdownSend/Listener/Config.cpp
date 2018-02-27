@@ -17,6 +17,11 @@ const SSerialShutDownInfo& Config::getSerialShutdownInfo()
 	return mSerialShutdownInfo;
 }
 
+const STime& Config::getTimeConfig()
+{
+	return mReconnectTime;
+}
+
 bool Config::init()
 {
 	try {
@@ -45,6 +50,9 @@ bool Config::init()
 		mHeartBeat.http_port = ZIni::readInt("HeartBeat", "http_port", 80, "conf.ini");
 		mHeartBeat.http_path = ZIni::readString("HeartBeat", "http_path", "", "conf.ini");
 		mHeartBeat.http_get_paramname = ZIni::readString("HeartBeat", "http_get_paramname", "str", "conf.ini");
+
+		mReconnectTime.reconnect_gap = ZIni::readInt("Time", "reconnect_time", 30, "conf.ini");
+
 		return true;
 	}
 	catch (std::exception e)

@@ -43,32 +43,7 @@
 CDataQueue g_queue;
 CSocketSwitch g_socketSwitch;
 CSerial2Socket g_Serial;
-//CSocketServer g_socketShowdown;
-//CHeartBeatClient g_heartBeat;
-//CSerialShutdown g_serialShutdown;
-
-//std::string TCHAR2STRING(TCHAR *STR)
-//{
-//	int iLen = WideCharToMultiByte(CP_ACP, 0, STR, -1, NULL, 0, NULL, NULL);
-//	char* chRtn = new char[iLen * sizeof(char)];
-//	WideCharToMultiByte(CP_ACP, 0, STR, -1, chRtn, iLen, NULL, NULL);
-//	std::string str(chRtn);
-//	return str;
-//}
-//
-//int ShowError (LONG lError, LPCTSTR lptszMessage)
-//{
-//	// Generate a message text
-//	//TCHAR tszMessage[256];
-//	//wsprintf(tszMessage,_T("%s\n(error code %d)"), lptszMessage, lError);
-//
-//	// Display message-box and return with an error-code
-//	//::MessageBox(0,tszMessage,_T("Listener"), MB_ICONSTOP|MB_OK);
-//	printf("%s\n",TCHAR2STRING((TCHAR*)lptszMessage).c_str());
-//	printf("%s(error code %d)\n", lError);
-//	return 1;
-//}
-
+bool g_socketInited = true;
 
 static VOID ShowNotifyIcon(HWND hWnd, BOOL addOrHide)
 {
@@ -109,6 +84,21 @@ void initWindow()
 	HideToTray(GetConsoleWindow());
 }
 
+UINT WINAPI reconnectThread(void* pParam)
+{
+	while (!g_socketInited)
+	{
+		Sleep(Config::instance().getTimeConfig().reconnect_gap);
+
+		if (!g_socketInited && g_socketSwitch.init(g_queue))
+		{
+			Log("socket switch init success!");
+			g_socketInited = true;
+		}
+	}
+	return 0;
+}
+
 int __cdecl _tmain (int /*argc*/, char** /*argv*/)
 {
     CSerial serial;
@@ -121,18 +111,30 @@ int __cdecl _tmain (int /*argc*/, char** /*argv*/)
 
 	//初始化串口转Socket服务
 	if (!g_socketSwitch.init(g_queue))
-		return Log("init socket switch failed");
+	{
+		g_socketInited = false;
+		Log("init socket switch failed");
+	}
+	else
+	{
+		Log("socket switch init success!");
+	}
+
+	if (!g_socketInited)
+	{
+		/** 线程ID */
+		UINT threadId;
+		/** 开启串口数据监听线程 */
+		HANDLE hThread = (HANDLE)_beginthreadex(NULL, 0, reconnectThread, NULL, 0, &threadId);
+		if (!hThread)
+		{
+			Log("Failed to create thread!");
+		}
+		::CloseHandle(hThread);
+	}
 
 	if (!g_Serial.init(g_queue))
 		return Log("init serial failed");
 
-	//if(!g_socketShowdown.init())
-	//	return Log("init shutdown server failed");
-
-	//if (!g_heartBeat.init())
-	//	return Log("init heart beat failed");
-
-	//if (!g_serialShutdown.init())
-	//	return Log("init  serial shutdown failed");
     return 0;
 }

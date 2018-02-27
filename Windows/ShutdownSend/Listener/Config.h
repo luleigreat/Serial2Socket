@@ -66,6 +66,10 @@ struct SHeartBeat {
 	}
 };
 
+struct STime {
+	int reconnect_gap;
+};
+
 class Config
 {
 public:
@@ -78,13 +82,14 @@ public:
 	const SHeartBeat& getHeartBeat();
 	const SSocketShutDownInfo& getShutDownInfo();
 	const SSerialShutDownInfo& getSerialShutdownInfo();
+	const STime& getTimeConfig();
 
 	bool init();
-private:
 	int getParity(std::string sParity);
 	int getStopbit(int stopbit);
 private:
 	SHeartBeat mHeartBeat;
 	SSerialShutDownInfo mSerialShutdownInfo;
 	SSocketShutDownInfo mShutDownInfo;
+	STime mReconnectTime;
 };

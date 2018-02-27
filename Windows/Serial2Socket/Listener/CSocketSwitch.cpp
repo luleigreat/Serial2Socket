@@ -37,7 +37,15 @@ bool CSocketSwitch::initSocket()
 	for (int i = 0; i <nSocketCount; i++)
 	{
 		if (!initSocket(i))
+		{
+			for (int j = 0; j < i; j++)
+			{
+				mSocket[i] = INVALID_SOCKET;
+				closesocket(mSocket[j]);
+			}
+
 			return 0;
+		}
 	}
 
 	Log("socket init success");

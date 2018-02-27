@@ -16,6 +16,13 @@ int Config::getSocketCount()
 {
 	return mSocketCount;
 }
+
+const STime& Config::getTimeConfig()
+{
+	return mReconnectTime;
+}
+
+
 bool Config::init()
 {
 	try {
@@ -42,6 +49,7 @@ bool Config::init()
 			mVecSocket.push_back(socket);
 		}
 
+		mReconnectTime.reconnect_gap = ZIni::readInt("Time", "reconnect_time", 30000, "conf.ini");
 		return true;
 	}
 	catch (std::exception e)

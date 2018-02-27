@@ -16,7 +16,9 @@ struct SSocket {
 	int port;
 };
 
-
+struct STime {
+	int reconnect_gap;
+};
 
 class Config
 {
@@ -32,6 +34,7 @@ public:
 	const SCom& getCom();
 	int getSocketCount();
 	SSocket getSocket(int index);
+	const STime& getTimeConfig();
 
 	bool init();
 private:
@@ -41,4 +44,5 @@ private:
 	SCom mCom;
 	std::vector<SSocket> mVecSocket;
 	int mSocketCount;
+	STime mReconnectTime;
 };

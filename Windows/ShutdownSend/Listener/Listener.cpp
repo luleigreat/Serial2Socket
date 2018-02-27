@@ -37,10 +37,12 @@
 #pragma comment(lib, "user32.lib")  
 #pragma comment(lib, "Shell32.lib")
 
-CSocketServer g_socketShowdown;
+CSocketServer g_socketShutdown;
 CHeartBeatClient g_heartBeat;
 CSerialShutdown g_serialShutdown;
 
+bool g_bHeartbeatInited = true;
+bool g_bSocketShutdownInited = true;
 //std::string TCHAR2STRING(TCHAR *STR)
 //{
 //	int iLen = WideCharToMultiByte(CP_ACP, 0, STR, -1, NULL, 0, NULL, NULL);
@@ -103,6 +105,27 @@ void initWindow()
 	HideToTray(GetConsoleWindow());
 }
 
+UINT WINAPI reconnectThread(void* pParam)
+{
+	while (!g_bHeartbeatInited || !g_bSocketShutdownInited)
+	{
+		Sleep(Config::instance().getTimeConfig().reconnect_gap);
+
+		if (!g_bSocketShutdownInited && g_socketShutdown.init())
+		{
+			Log("socket shutdown init success!");
+			g_bSocketShutdownInited = true;
+		}
+			
+		if (!g_bHeartbeatInited && g_heartBeat.init())
+		{
+			Log("heart beat init success!");
+			g_bHeartbeatInited = true;
+		}
+	}
+	return 0;
+}
+
 int __cdecl _tmain (int /*argc*/, char** /*argv*/)
 {
     CSerial serial;
@@ -113,17 +136,50 @@ int __cdecl _tmain (int /*argc*/, char** /*argv*/)
 	if (!Config::instance().init())
 		return Log("init config failed");
 
-	if(!g_socketShowdown.init())
-		return Log("init shutdown server failed");
+	if (!g_socketShutdown.init())
+	{
+		g_bSocketShutdownInited = false;
+		Log("init shutdown server failed");
+	}
+	else
+	{
+		Log("socket shutdown init success!");
+	}
 
 	if (!g_heartBeat.init())
-		return Log("init heart beat failed");
-
-	if (!g_serialShutdown.init())
-		return Log("init  serial shutdown failed");
-
-	while (true) {
-		Sleep(1000);
+	{
+		g_bHeartbeatInited = false;
+		Log("init heart beat failed");
 	}
+	else
+	{
+		Log("heart beat init success!");
+	}
+
+	if (!g_bHeartbeatInited || !g_bSocketShutdownInited)
+	{
+		/** 线程ID */
+		UINT threadId;
+		/** 开启串口数据监听线程 */
+		HANDLE hThread = (HANDLE)_beginthreadex(NULL, 0, reconnectThread, NULL, 0, &threadId);
+		if (!hThread)
+		{
+			Log("Failed to create thread!");
+		}
+		::CloseHandle(hThread);
+	}
+
+	if (Config::instance().getSerialShutdownInfo().needShutDown())
+	{
+		if (!g_serialShutdown.init())
+			return Log("init  serial shutdown failed");
+	}
+	else
+	{
+		while (true) {
+			Sleep(1000);
+		}
+	}
+
     return 0;
 }
