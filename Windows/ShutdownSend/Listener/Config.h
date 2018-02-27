@@ -45,6 +45,7 @@ struct SHeartBeat {
 	std::string http_host;
 	int http_port;
 	std::string http_path;
+	std::string http_get_paramname;
 
 	int socket_on;
 	int http_on;

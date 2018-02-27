@@ -44,6 +44,7 @@ bool Config::init()
 		mHeartBeat.http_host = ZIni::readString("HeartBeat", "http_ip", "", "conf.ini");
 		mHeartBeat.http_port = ZIni::readInt("HeartBeat", "http_port", 80, "conf.ini");
 		mHeartBeat.http_path = ZIni::readString("HeartBeat", "http_path", "", "conf.ini");
+		mHeartBeat.http_get_paramname = ZIni::readString("HeartBeat", "http_get_paramname", "str", "conf.ini");
 		return true;
 	}
 	catch (std::exception e)

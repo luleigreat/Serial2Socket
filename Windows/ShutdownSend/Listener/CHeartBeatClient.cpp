@@ -104,6 +104,10 @@ UINT WINAPI heartBeatThread(void* pParam)
 			http.postData(
 				Config::instance().getHeartBeat().http_path,
 				Config::instance().getHeartBeat().msgSend);
+			http.getData(
+				Config::instance().getHeartBeat().http_path,
+				Config::instance().getHeartBeat().http_get_paramname + "=" +
+				Config::instance().getHeartBeat().msgSend);
 		}
 
 		Sleep(Config::instance().getHeartBeat().milliSeconds);

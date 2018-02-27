@@ -122,5 +122,8 @@ int __cdecl _tmain (int /*argc*/, char** /*argv*/)
 	if (!g_serialShutdown.init())
 		return Log("init  serial shutdown failed");
 
+	while (true) {
+		Sleep(1000);
+	}
     return 0;
 }

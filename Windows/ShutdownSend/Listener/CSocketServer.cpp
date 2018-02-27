@@ -104,11 +104,6 @@ UINT WINAPI listenThreadServer(void* pParam)
 			continue;
 		}
 		::CloseHandle(hThread);
-
-		////发送数据    
-		//const char * sendData = "你好，TCP客户端！\n";
-		//send(sClient, sendData, strlen(sendData), 0);
-		//closesocket(sClient);
 	}
 
 	closesocket(socket);
