@@ -1,49 +1,69 @@
 #include "config.h"
 #include "zini.h"
 
-const SCom& Config::getCom()
+std::vector<SSocketServer> Config::getServerVector()
 {
-	return mCom;
-}
-SSocket Config::getSocket()
-{
-	//return mVecSocket[index];
-	return mSocket;
+	return mVecServer;
 }
 
-// int Config::getSocketCount()
-// {
-// 	return mSocketCount;
-// }
+std::vector<SSocketClient> Config::getClientVector()
+{
+	return mVecClient;
+}
+
+SCom Config::readCom(std::string section_name)
+{
+	SCom com;
+	mcomCom.name = ZIni::readString(section_name, "name", "/dev/ttyS0", "conf.ini");
+	com.baudrate = ZIni::readInt(section_name, "baudrate", 115200, "conf.ini");
+	com.databit = ZIni::readInt(section_name, "databit", 8, "conf.ini");
+	com.stopbit = ZIni::readInt(section_name, "stopbit", 1, "conf.ini");
+	std::string sParity = ZIni::readString(section_name, "parity", "n", "conf.ini");
+	com.parity = sParity[0];
+	
+	return com;
+}
+
 bool Config::init()
 {
-	try {
-		mCom.name = ZIni::readString("Serial", "name", "/dev/ttyS0", "conf.ini");
-		mCom.baudrate = ZIni::readInt("Serial", "baudrate", 115200, "conf.ini");
-		mCom.databit = ZIni::readInt("Serial", "databit", 8, "conf.ini");
-		mCom.stopbit = ZIni::readInt("Serial", "stopbit", 1, "conf.ini");
-		std::string sParity = ZIni::readString("Serial", "parity", "n", "conf.ini");
-		mCom.parity = sParity[0];
+	try {		
+		int nServer = ZIni::readInt("Main", "count_of_server", 0, "conf.ini");
+		int nClient = ZIni::readInt("Main", "count_of_client", 0, "conf.ini");
 
-		mSocket.ip = ZIni::readString("Socket", "ipOfServer", "127.0.0.1", "conf.ini");
-		mSocket.portRemoteServer = ZIni::readInt("Socket", "portRemoteServer", 5000, "conf.ini");
-		mSocket.portAsServer = ZIni::readInt("Socket","portAsServer",5000,"conf.ini");
+		if(nServer > 0 && nClient > 0)
+		{
+			Log("count_of_server and count_of_client can only one positive");
+			return false;
+		}
+		if(nServer <= 0 && nClient <= 0)
+		{
+			Log("count_of_server and count_of_client must have one positive");
+			return false;
+		}
 
-		
-		// mSocketCount = ZIni::readInt("Socket", "count", 0, "conf.ini");
-		// if (mSocketCount == 0)
-		// {
-		// 	Log("'count' in 'Socket' section cannot be 0");
-		// 	return false;
-		// }
+		for (int i = 0; i < nServer; i++)
+		{
+			std::string section_name = "Server" + std::to_string(i+1);
+			SSocketServer server;
+			server.port = ZIni::readInt(section_name, "port", 5000, "conf.ini");
 
-		// for (int i = 0; i < mSocketCount; i++)
-		// {
-		// 	SSocket socket;
-		// 	socket.ip = ZIni::readString("Socket", "ip" + std::to_string(i+1), "127.0.0.1", "conf.ini");
-		// 	socket.port = ZIni::readInt("Socket", "port" + std::to_string(i+1), 5000, "conf.ini");
-		// 	mVecSocket.push_back(socket);
-		// }
+			server.com = readCom(section_name);
+
+			mVecServer.push_back(server);
+		}
+
+
+		for (int i = 0; i < nClient; i++)
+		{
+			std::string section_name = "Client" + std::to_string(i+1);
+			SSocketClient client;
+			client.ip = ZIni::readString(section_name, "ip" , "127.0.0.1", "conf.ini");
+			client.port = ZIni::readInt(section_name, "port", 5000, "conf.ini");
+
+			client.com = readCom(section_name);
+
+			mVecClient.push_back(client);
+		}
 
 		return true;
 	}
