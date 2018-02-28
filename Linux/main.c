@@ -4,7 +4,7 @@
 #include <queue>
 #include <string>
 #include "CServer.h"
-
+#include <signal.h>
 
 
 //全局变量定义
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-
+	signal(SIGPIPE,SIG_IGN);
 	// auto vecClient = Config::instance().getClientVector();
 	// for(int i=0; i<vecClient.size(); i++)
 	// {

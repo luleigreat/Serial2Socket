@@ -32,7 +32,7 @@ void* threadCom2Client(void* arg)
 			while( iter != pServer->mVecClientId.end())
             {
                 int ret = send(*iter, rwbuf, strlen(rwbuf), 0);
-                if(ret == 0)
+                if(ret <= 0)
                 {
                     iter = pServer->mVecClientId.erase(iter);
                 }
@@ -92,16 +92,21 @@ void process_cli(ARG* info)
 
 	while(1)
 	{
-		if (num = recv(connectfd, recvbuf, MAXDATASIZE,0)) 
+        int num = recv(connectfd, recvbuf, MAXDATASIZE,0);
+		if (num > 0) 
 		{  
 			recvbuf[num] = '\0';  
 			ComSend(pServer->mComid,recvbuf);
 		}
-		else
-		{
+		else if(num == 0)
+        {
 			printf("Client disconnected");
 			close(connectfd);   
 			break;
+        }
+        else
+		{
+            printf("Failed to accept client data\n");
 		}
 	}
 }
