@@ -10,6 +10,8 @@
 //全局变量定义
 
 std::vector<pthread_t> g_vecThreadId;
+std::vector<SServer*> g_vecServer;
+std::vector<SClient*> g_vecClient;
 
 // void* threadSerial2Socket(void*)
 // {
@@ -43,34 +45,13 @@ int main(int argc, char **argv)
 	}
 
 	signal(SIGPIPE,SIG_IGN);
-	// auto vecClient = Config::instance().getClientVector();
-	// for(int i=0; i<vecClient.size(); i++)
-	// {
-	// 	//init for client socket
-	// 	if(ret = (sockfdClient = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-	// 	{
-	// 		printf("creat socket failed \n");
-	// 		exit(1);
-	// 	}
-	// 	int portdata = vecClient[i].port;
-	// 	memset(&server_addr, 0, sizeof(server_addr));
-	// 	server_addr.sin_family = AF_INET;
-	// 	server_addr.sin_port = htons(portdata);
-	// 	server_addr.sin_addr.s_addr = inet_addr(vecClient[i].ip.c_str());
-		
-	// 	printf("Destination IP: %s : %d\n", inet_ntoa(server_addr.sin_addr), portdata);	
-	// 	printf("Connecting...\n");
-
-	// 	if(ret = connect(sockfdClient, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-	// 	{
-	// 		printf("connect failed\n");
-	// 		exit(1);
-	// 	}
-	// 	else if(ret == 0)
-	// 	{
-	// 		printf("Conect success\n");
-	// 	}
-	// }
+	auto vecClient = Config::instance().getClientVector();
+	for(int i=0; i<vecClient.size(); i++)
+	{
+		CClient* pClient = new CClient();
+		pClient->init(vecClient[i],g_vecThreadId);
+		g_vecClient.push_back(pClient);
+	}
 
 
 	//for server
@@ -84,6 +65,10 @@ int main(int argc, char **argv)
 			printf("int server %d failed",i);
 			exit(0);
 		}
+		else
+		{
+			g_vecServer.push_back(pServer);
+		}
 	}
 
 	//如果直接运行等待代码，一般会等待成功，返回1
@@ -96,5 +81,13 @@ int main(int argc, char **argv)
 		pthread_join(g_vecThreadId[i],NULL);
 	}
 
+	for(int i=0; i<g_vecClient.size(); i++)
+	{
+		delete g_vecClient[i];
+	}
+	for(int i=0; i<g_vecServer.size(); i++)
+	{
+		delete g_vecServer[i];
+	}
 	exit(0);
 }

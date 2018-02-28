@@ -13,7 +13,5 @@ private:
 public:
     int mSocketid;
     int mComid;
-    int mServerIndex;
-
     std::vector<int> mVecClientId;
 };
