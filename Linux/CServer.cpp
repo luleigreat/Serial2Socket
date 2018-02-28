@@ -92,7 +92,7 @@ void process_cli(ARG* info)
 
 	while(1)
 	{
-        int num = recv(connectfd, recvbuf, MAXDATASIZE,0);
+        num = recv(connectfd, recvbuf, MAXDATASIZE,0);
 		if (num > 0) 
 		{  
 			recvbuf[num] = '\0';  

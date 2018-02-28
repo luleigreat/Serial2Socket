@@ -4,34 +4,15 @@
 #include <queue>
 #include <string>
 #include "CServer.h"
+#include "CClient.h"
 #include <signal.h>
 
 
 //全局变量定义
 
 std::vector<pthread_t> g_vecThreadId;
-std::vector<SServer*> g_vecServer;
-std::vector<SClient*> g_vecClient;
-
-// void* threadSerial2Socket(void*)
-// {
-//     // pthread_detach(pthread_self());//分离后仍可被等待
-//     printf("threadSerial2Socket pid is: %d, tid is: %d\n", getpid(),pthread_self());
-// 	int rwnum = 0;
-// 	char rwbuf[1024];
-// 	while(1)
-// 	{
-// 		if((rwnum=ComReceive(fcom, rwbuf, 0)) > 0) 
-// 		{
-// 			rwbuf[rwnum]= 0;
-// 			printf(rwbuf);
-// 			send(sockfdClient, rwbuf, strlen(rwbuf), 0);
-// 			printf(" Send %d byte(s) to TCP Server\n", strlen(rwbuf));
-// 			fflush(stdout);
-// 		}
-// 	}
-
-// }
+std::vector<CServer*> g_vecServer;
+std::vector<CClient*> g_vecClient;
 
 int main(int argc, char **argv)
 {

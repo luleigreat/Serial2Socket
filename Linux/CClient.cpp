@@ -21,6 +21,7 @@ void* threadCom2Client2(void* arg)
                 int ret = send(pClient->mSocketid, rwbuf, strlen(rwbuf), 0);
                 if(ret <= 0)
                 {
+                    pClient->mSocketInited = false;
                     printf("send failed");
                 }
             }
@@ -41,6 +42,31 @@ void* threadInitClient(void* arg)
         
         usleep(5000);
     }
+}
+
+void* threadSocketClient(void* arg)
+{
+    CClient* pClient = (CClient*)arg;
+    // pthread_detach(pthread_self());//分离后仍可被等待
+    printf("threadSerial2Socket pid is: %d, tid is: %d\n", getpid(),pthread_self());
+	int rwnum = 0;
+	char rwbuf[1024];
+	while(1)
+	{
+        if(pClient->mSocketInited)
+        {
+            int num = recv(pClient->mSocketid, rwbuf, 1024,0);
+            if (num > 0) 
+            {  
+                rwbuf[num] = '\0';  
+                ComSend(pClient->mComid,rwbuf);
+            }
+            else if(num <= 0)
+            {
+                pClient->mSocketInited = false;
+            }
+        }		
+	}
 }
 
 CClient::CClient()
@@ -68,6 +94,7 @@ bool CClient::init(SSocketClient client,std::vector<pthread_t>& vecThreadId)
 
     vecThreadId.push_back(threadId1);
     vecThreadId.push_back(threadId2);
+    vecThreadId.push_back(threadId3);
 
     return true;
 }
@@ -75,6 +102,8 @@ bool CClient::init(SSocketClient client,std::vector<pthread_t>& vecThreadId)
 bool CClient::initClient(std::string ip,int port)
 {
     //init for client socket
+    int ret = 0;
+    struct sockaddr_in server_addr;
     if(ret = (mSocketid = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         printf("create socket failed \n");
@@ -85,7 +114,7 @@ bool CClient::initClient(std::string ip,int port)
     server_addr.sin_port = htons(port);
     server_addr.sin_addr.s_addr = inet_addr(ip.c_str());
     
-    printf("Destination IP: %s : %d\n", inet_ntoa(server_addr.sin_addr), portdata);	
+    printf("Destination IP: %s : %d\n", inet_ntoa(server_addr.sin_addr), port);	
     printf("Connecting...\n");
 
     if(ret = connect(mSocketid, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
