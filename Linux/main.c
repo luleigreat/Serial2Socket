@@ -91,9 +91,9 @@ int main(int argc, char **argv)
     //  pthread_cancel(tid);
     //线程可以自我取消也可以被取消，线程终止
     //调用pthread_exit(tid);和取消同样用法。
-	for(int i=0; i<g_vecThreadId; i++)
+	for(int i=0; i<g_vecThreadId.size(); i++)
 	{
-		pthread_join(g_vecThreadId(i));
+		pthread_join(g_vecThreadId[i],NULL);
 	}
 
 	exit(0);

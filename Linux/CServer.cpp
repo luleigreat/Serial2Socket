@@ -14,20 +14,25 @@ typedef struct  _ARG  {
     struct sockaddr_in client;   
 }ARG; 
 
+void process_cli(ARG* info);    //客户端请求处理函数  
+void* start_routine(void* arg);        //线程函数  
+
 void* threadCom2Client(void* arg)
 {
 	CServer* pServer = (CServer*)arg;
 	char rwbuf[1024];
+    int rwnum = 0;
+    int fcom = pServer->mComid;
 	while(1)
 	{
 		if((rwnum=ComReceive(fcom, rwbuf, 0)) > 0) 
 		{
 			rwbuf[rwnum]= 0;
-            auto iter = pServer->mVecClient.begin();
+            auto iter = pServer->mVecClientId.begin();
 			while( iter != pServer->mVecClientId.end())
             {
                 int ret = send(*iter, rwbuf, strlen(rwbuf), 0);
-                if(ret == SOCKET_ERROR)
+                if(ret == 0)
                 {
                     iter = pServer->mVecClientId.erase(iter);
                 }
@@ -55,7 +60,7 @@ void* threadSocketServer(void* param)
 	while(1)
 	{
 		//阻塞直到有客户端连接，不然多浪费CPU资源。  
-		if((connect_fd = accept(sockfdAsServer, (struct sockaddr*)&client, (socklen_t *)&sin_size)) == -1){  
+		if((connect_fd = accept(pServer->mSocketid, (struct sockaddr*)&client, (socklen_t *)&sin_size)) == -1){  
 			printf("accept socket error: %s(errno: %d)",strerror(errno),errno);  
 			continue;  
 		}  
@@ -66,7 +71,7 @@ void* threadSocketServer(void* param)
         memcpy(&arg->client, &client, sizeof(client));  
           
         //add to vector
-        pServer->mVecClient.push_back(connect_fd);
+        pServer->mVecClientId.push_back(connect_fd);
 
         if (pthread_create(&thread, NULL, start_routine, (void*)arg)) {        //创建线程，以客户端连接为参数，start_routine为线程执行函数  
             perror("Pthread_create() error");  
@@ -77,7 +82,7 @@ void* threadSocketServer(void* param)
 void process_cli(ARG* info)  
 {  
     int connectfd = info->connfd;
-    sockaddr_in client = info->client;
+    struct sockaddr_in client = info->client;
     CServer* pServer = info->pServer;
 
     int num;  
@@ -130,6 +135,8 @@ bool CServer::init(SSocketServer server,std::vector<pthread_t>& vecThreadId)
 bool CServer::initServer(int port)
 {
     //init for server socket
+    struct sockaddr_in local_addr;
+    int ret = 0;
     if(ret = (mSocketid = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         printf("create socket failed \n");

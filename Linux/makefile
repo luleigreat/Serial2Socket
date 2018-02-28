@@ -7,7 +7,7 @@ zini.o:zini.cpp zini.h
 config.o:config.cpp config.h zini.h
 	g++ -std=c++11 -c config.cpp
 server.o:CServer.cpp CServer.h config.h util.h comdev.h
-	g++ -std=c++11 -c CServer.cpp
+	g++ -std=c++11 -c CServer.cpp -o server.o
 main.o:main.c comdev.h config.h
 	g++ -std=c++11 -c main.c  -lpthread
 
