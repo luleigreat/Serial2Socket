@@ -20,7 +20,7 @@ struct SSocketClient {
 	std::string ip;
 	int port;
 	SCom com;
-}
+};
 
 
 class Config

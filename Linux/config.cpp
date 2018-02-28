@@ -14,7 +14,7 @@ std::vector<SSocketClient> Config::getClientVector()
 SCom Config::readCom(std::string section_name)
 {
 	SCom com;
-	mcomCom.name = ZIni::readString(section_name, "name", "/dev/ttyS0", "conf.ini");
+	com.name = ZIni::readString(section_name, "name", "/dev/ttyS0", "conf.ini");
 	com.baudrate = ZIni::readInt(section_name, "baudrate", 115200, "conf.ini");
 	com.databit = ZIni::readInt(section_name, "databit", 8, "conf.ini");
 	com.stopbit = ZIni::readInt(section_name, "stopbit", 1, "conf.ini");
@@ -32,12 +32,12 @@ bool Config::init()
 
 		if(nServer > 0 && nClient > 0)
 		{
-			Log("count_of_server and count_of_client can only one positive");
+			printf("count_of_server and count_of_client can only one positive");
 			return false;
 		}
 		if(nServer <= 0 && nClient <= 0)
 		{
-			Log("count_of_server and count_of_client must have one positive");
+			printf("count_of_server and count_of_client must have one positive");
 			return false;
 		}
 
