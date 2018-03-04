@@ -9,7 +9,7 @@ class CClient{
 public:
     CClient();
     bool init(SSocketClient client,std::vector<pthread_t>& vecThreadId);
-private:
+
     bool initClient(std::string ip,int port);
     bool initCom(SCom com);
 public:
