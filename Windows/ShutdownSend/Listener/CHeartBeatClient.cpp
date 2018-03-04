@@ -23,14 +23,14 @@ bool CHeartBeatClient::init()
 		}			
 	}
 
-	if (Config::instance().getHeartBeat().hasHttp())
-	{
-		if (!mHttp.initSocket(Config::instance().getHeartBeat().http_host,Config::instance().getHeartBeat().http_port))
-		{
-			Log("init heart beat http socket failed");
-			return false;
-		}
-	}
+	//if (Config::instance().getHeartBeat().hasHttp())
+	//{
+	//	if (!mHttp.initSocket(Config::instance().getHeartBeat().http_host,Config::instance().getHeartBeat().http_port))
+	//	{
+	//		Log("init heart beat http socket failed");
+	//		return false;
+	//	}
+	//}
 
 	if (!openThread())
 	{
@@ -101,13 +101,19 @@ UINT WINAPI heartBeatThread(void* pParam)
 
 		if (Config::instance().getHeartBeat().hasHttp())
 		{
-			http.postData(
-				Config::instance().getHeartBeat().http_path,
-				Config::instance().getHeartBeat().msgSend);
-			http.getData(
-				Config::instance().getHeartBeat().http_path,
-				Config::instance().getHeartBeat().http_get_paramname + "=" +
-				Config::instance().getHeartBeat().msgSend);
+			//http.postData(
+			//	Config::instance().getHeartBeat().http_path,
+			//	Config::instance().getHeartBeat().msgSend);
+			//http.getData(
+			//	Config::instance().getHeartBeat().http_path,
+			//	Config::instance().getHeartBeat().http_get_paramname + "=" +
+			//	Config::instance().getHeartBeat().msgSend);
+			std::string ip = Config::instance().getHeartBeat().http_host;
+			int port = Config::instance().getHeartBeat().http_port;
+			std::string path = Config::instance().getHeartBeat().http_path;
+			std::string content = Config::instance().getHeartBeat().http_get_paramname + "=" +
+				Config::instance().getHeartBeat().msgSend;
+			sendGetRequest(ip, port, path, content);
 		}
 
 		Sleep(Config::instance().getHeartBeat().milliSeconds);

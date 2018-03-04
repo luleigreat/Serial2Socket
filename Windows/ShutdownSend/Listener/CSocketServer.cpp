@@ -73,7 +73,7 @@ UINT WINAPI clientThread(void* pParam)
 			}
 		}
 	} while (ret > 0);
-
+	return 0;
 }
 
 //socketÏß³Ì

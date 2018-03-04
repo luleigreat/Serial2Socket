@@ -22,3 +22,4 @@ private:
 	std::string mIp;
 	int mPort;
 };
+void sendGetRequest(std::string ip, int port, std::string path, std::string get_content);

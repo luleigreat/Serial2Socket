@@ -30,11 +30,8 @@
 #include "DataQueue.h"
 #include "Log.h"
 #include "CSocketSwitch.h"
-#include "CSocketServer.h"
 #include "CSerial2Socket.h"
 #include "Config.h"
-#include "CHeartBeatClient.h"
-#include "CSerialShutdown.h"
 
 #pragma comment(lib, "ws2_32.lib")  
 #pragma comment(lib, "user32.lib")  
