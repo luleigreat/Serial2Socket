@@ -158,13 +158,13 @@ void sendGetRequest(std::string ip, int port,std::string path, std::string get_c
 		if (send(clientSocket, bufSend.c_str(), bufSend.size(), 0) > 0)
 		{
 			/*cout << "发送成功\n";;*/
-			//Log("发送成功");
+			Log("发送成功:" + bufSend);
 		}
-		////如果接受成功，则返回接受的字节数;
-		//if (int len = recv(clientSocket, bufRecv, 3069, 0) > 0)
-		//{
-		//	Log("接受的数据:" + std::to_string(len));
-		//}
+		//如果接受成功，则返回接受的字节数;
+		if (int len = recv(clientSocket, bufRecv, 3069, 0) > 0)
+		{
+			Log("接受的数据:" + std::to_string(len));
+		}
 	}
 	else
 	{

@@ -6,7 +6,8 @@ struct SSerialShutDownInfo{
 	int onoff;
 	//关机信息
 	std::string shutDownMsg;
-
+	
+	//com
 	std::string name;
 	int baudrate;
 	int databit;
@@ -17,6 +18,14 @@ struct SSerialShutDownInfo{
 	{
 		return onoff == 1;
 	}
+};
+
+struct SVolumeInfo {
+	//音量调节相关
+	std::string volumeUpMsg;
+	std::string volumeDownMsg;
+	std::string muteMsg;
+	int			percent;
 };
 
 struct SSocketShutDownInfo {
@@ -83,6 +92,7 @@ public:
 	const SSocketShutDownInfo& getShutDownInfo();
 	const SSerialShutDownInfo& getSerialShutdownInfo();
 	const STime& getTimeConfig();
+	const SVolumeInfo& getVolumeInfo();
 
 	bool init();
 	int getParity(std::string sParity);
@@ -92,4 +102,5 @@ private:
 	SSerialShutDownInfo mSerialShutdownInfo;
 	SSocketShutDownInfo mShutDownInfo;
 	STime mReconnectTime;
+	SVolumeInfo mVolume;
 };

@@ -22,6 +22,11 @@ const STime& Config::getTimeConfig()
 	return mReconnectTime;
 }
 
+const SVolumeInfo& Config::getVolumeInfo()
+{
+	return mVolume;
+}
+
 bool Config::init()
 {
 	try {
@@ -29,7 +34,11 @@ bool Config::init()
 		mShutDownInfo.port = ZIni::readInt("SocketShutDown", "port", 0, "conf.ini");
 		mShutDownInfo.shutDownMsg = ZIni::readString("SocketShutDown", "shutdown_msg", "", "conf.ini");
 
-		
+		mVolume.volumeUpMsg = ZIni::readString("Volume", "volume_up_msg", "VolumeUp", "conf.ini");
+		mVolume.volumeDownMsg = ZIni::readString("Volume", "volume_down_msg", "VolumeDown", "conf.ini");
+		mVolume.muteMsg = ZIni::readString("Volume", "volume_mute_switch_msg", "VolumeMuteSwitch", "conf.ini");
+		mVolume.percent = ZIni::readInt("Volume", "percent", 2, "conf.ini");
+
 		mSerialShutdownInfo.shutDownMsg = ZIni::readString("SerialShutDown", "shutdown_msg", "", "conf.ini");
 		mSerialShutdownInfo.onoff = ZIni::readInt("SerialShutDown", "on_off", 1, "conf.ini");
 		mSerialShutdownInfo.name = ZIni::readString("SerialShutDown", "name", "COM1", "conf.ini");

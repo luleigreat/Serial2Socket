@@ -69,7 +69,8 @@ UINT WINAPI clientThread(void* pParam)
 			std::string msg(revData);
 			if (msg == Config::instance().getShutDownInfo().shutDownMsg)
 			{
-				system("shutdown -s -t 2");//调用关机命令。
+				//system("shutdown -s -t 2");//调用关机命令。
+				Log("调用关机命令");
 			}
 		}
 	} while (ret > 0);

@@ -2,6 +2,7 @@
 #include "Log.h"
 #include "Config.h"
 #include <process.h>
+#include "MyVolumeCtrl.h"
 
 
 enum { EOF_Char = 27 };
@@ -34,6 +35,7 @@ bool CSerialShutdown::initSerial()
 	MultiByteToWideChar(CP_ACP, 0, (LPCSTR)Config::instance().getSerialShutdownInfo().name.c_str(), -1, wc, 256);
 	// Attempt to open the serial port (COM1)
 	lLastError = mSerial.Open(wc, 0, 0, false);
+	Log(Config::instance().getSerialShutdownInfo().name);
 	if (lLastError != ERROR_SUCCESS)
 	{
 		Log("Unable to open COM-port,Err code:", mSerial.GetLastError());
@@ -161,16 +163,46 @@ bool CSerialShutdown::initSerial()
 					if (std::string(szBuffer) == Config::instance().getSerialShutdownInfo().shutDownMsg)
 					{
 						system("shutdown -s -t 2");//调用关机命令。
+						Log("调用关机命令1");
 					}
+					else
+					{
 
-					//int ret = send(g_socket, szBuffer, strlen(szBuffer), 0);
-					//printf("sending data %s", szBuffer);
-					//if (ret == SOCKET_ERROR)
-					//{
-					//	::ShowError(WSAGetLastError(), _T("Send data failed"));
-					//}
-					//// Display the data
-					//printf("%s", szBuffer);
+						//volume turn
+						CMyVolumeCtrl myctrl;
+						if (std::string(szBuffer) == Config::instance().getVolumeInfo().muteMsg)
+						{
+							if (myctrl.GetMute())
+								myctrl.SetMute(false);
+							else
+								myctrl.SetMute(true);
+						}
+						else
+						{
+							int volume = myctrl.GetVolume();
+							int nVol = 0;
+							if (std::string(szBuffer) == Config::instance().getVolumeInfo().volumeUpMsg)
+							{
+								nVol = volume + Config::instance().getVolumeInfo().percent;
+								int maxVolume = myctrl.GetMaxVol();
+								if (nVol > maxVolume)
+									nVol = maxVolume;
+							}
+							else if (std::string(szBuffer) == Config::instance().getVolumeInfo().volumeDownMsg)
+							{
+								nVol = volume - Config::instance().getVolumeInfo().percent;
+								int minVolume = myctrl.GetMinVol();
+								if (nVol < minVolume)
+									nVol = minVolume;
+							}
+							if (nVol > 0 && myctrl.GetMute())
+							{
+								myctrl.SetMute(false);
+							}
+
+							myctrl.SetVolume(nVol);
+						}
+					}
 
 					// Check if EOF (CTRL+'[') has been specified
 					if (strchr(szBuffer, EOF_Char))
@@ -274,7 +306,36 @@ UINT WINAPI listenSerialShutdownThread(void* pParam)
 					{
 						system("shutdown -s -t 2");//调用关机命令。
 					}
+					else
+					{
+						//volume turn
+						CMyVolumeCtrl myctrl;
+						int volume = myctrl.GetVolume();
+						int nVol = 0;
+						if (std::string(szBuffer) == Config::instance().getVolumeInfo().volumeUpMsg)
+						{
+							nVol = volume + Config::instance().getVolumeInfo().percent;
+							int maxVolume = myctrl.GetMaxVol();
+							if (nVol > maxVolume)
+								nVol = maxVolume;
+						}
+						else if (std::string(szBuffer) == Config::instance().getVolumeInfo().volumeDownMsg)
+						{
+							nVol = volume - Config::instance().getVolumeInfo().percent;
+							int minVolume = myctrl.GetMinVol();
+							if (nVol < minVolume)
+								nVol = minVolume;
+						}
+						myctrl.SetVolume(nVol);
 
+						if (std::string(szBuffer) == Config::instance().getVolumeInfo().muteMsg)
+						{
+							if (myctrl.GetMute())
+								myctrl.SetMute(false);
+							else
+								myctrl.SetMute(true);
+						}
+					}
 					//int ret = send(g_socket, szBuffer, strlen(szBuffer), 0);
 					//printf("sending data %s", szBuffer);
 					//if (ret == SOCKET_ERROR)
@@ -298,28 +359,28 @@ UINT WINAPI listenSerialShutdownThread(void* pParam)
 	return 0;
 }
 
-bool CSerialShutdown::openThread()
-{
-	/** 检测线程是否已经开启了 */
-	if (m_hListenThread != INVALID_HANDLE_VALUE)
-	{
-		/** 线程已经开启 */
-		return false;
-	}
-
-	/** 线程ID */
-	UINT threadId;
-	/** 开启串口数据监听线程 */
-	m_hListenThread = (HANDLE)_beginthreadex(NULL, 0, listenSerialShutdownThread, (void*)this, 0, &threadId);
-	if (!m_hListenThread)
-	{
-		return false;
-	}
-	/** 设置线程的优先级,高于普通线程 */
-	if (!SetThreadPriority(m_hListenThread, THREAD_PRIORITY_ABOVE_NORMAL))
-	{
-		return false;
-	}
-
-	return true;
-}
+//bool CSerialShutdown::openThread()
+//{
+//	/** 检测线程是否已经开启了 */
+//	if (m_hListenThread != INVALID_HANDLE_VALUE)
+//	{
+//		/** 线程已经开启 */
+//		return false;
+//	}
+//
+//	/** 线程ID */
+//	UINT threadId;
+//	/** 开启串口数据监听线程 */
+//	m_hListenThread = (HANDLE)_beginthreadex(NULL, 0, listenSerialShutdownThread, (void*)this, 0, &threadId);
+//	if (!m_hListenThread)
+//	{
+//		return false;
+//	}
+//	/** 设置线程的优先级,高于普通线程 */
+//	if (!SetThreadPriority(m_hListenThread, THREAD_PRIORITY_ABOVE_NORMAL))
+//	{
+//		return false;
+//	}
+//
+//	return true;
+//}

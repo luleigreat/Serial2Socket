@@ -9,7 +9,7 @@ public:
 	bool init();
 
 	bool initSerial();
-	bool openThread();
+	//bool openThread();
 
 	CSerial& serial()
 	{
