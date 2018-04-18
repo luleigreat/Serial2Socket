@@ -3,6 +3,7 @@
 #include "Config.h"
 #include <windows.h>
 #include <process.h>
+#include "MyVolumeCtrl.h"
 
 bool CSocketServer::init()
 {
@@ -69,8 +70,46 @@ UINT WINAPI clientThread(void* pParam)
 			std::string msg(revData);
 			if (msg == Config::instance().getShutDownInfo().shutDownMsg)
 			{
-				//system("shutdown -s -t 2");//调用关机命令。
+				system("shutdown -s -t 2");//调用关机命令。
 				Log("调用关机命令");
+			}
+			else
+			{
+
+				//volume turn
+				CMyVolumeCtrl myctrl;
+				if (msg == Config::instance().getVolumeInfo().muteMsg)
+				{
+					if (myctrl.GetMute())
+						myctrl.SetMute(false);
+					else
+						myctrl.SetMute(true);
+				}
+				else
+				{
+					int volume = myctrl.GetVolume();
+					int nVol = 0;
+					if (msg == Config::instance().getVolumeInfo().volumeUpMsg)
+					{
+						nVol = volume + Config::instance().getVolumeInfo().percent;
+						int maxVolume = myctrl.GetMaxVol();
+						if (nVol > maxVolume)
+							nVol = maxVolume;
+					}
+					else if (msg == Config::instance().getVolumeInfo().volumeDownMsg)
+					{
+						nVol = volume - Config::instance().getVolumeInfo().percent;
+						int minVolume = myctrl.GetMinVol();
+						if (nVol < minVolume)
+							nVol = minVolume;
+					}
+					if (nVol > 0 && myctrl.GetMute())
+					{
+						myctrl.SetMute(false);
+					}
+
+					myctrl.SetVolume(nVol);
+				}
 			}
 		}
 	} while (ret > 0);
